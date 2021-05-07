@@ -10,7 +10,11 @@ namespace eosio {
     public:
       using contract::contract;
 
-      [[eosio::action]] void create(const name& issuer, const asset& maximum_supply);
+      [[eosio::action]] 
+      void create(const name& issuer, const asset& maximum_supply);
+
+      [[eosio::action]]
+      void issue( const name& to, const asset& quantity, const string& memo );
 
     private:
       struct [[eosio::table]] account {
@@ -31,7 +35,9 @@ namespace eosio {
 
       typedef eosio::multi_index< "accounts"_n, account > accounts;
       typedef eosio::multi_index< "stat"_n, currency_stats > stats;
-
+   
+      void sub_balance( const name& owner, const asset& value );
+      void add_balance( const name& owner, const asset& value, const name& ram_payer );
   };
 }
 
