@@ -74,7 +74,7 @@ void lotto::gamble(const name& from, const asset& quantity, const string& memo) 
   //Silli randoization(not good algorithm) just to introduce some radom
   uint64_t accumulated_str{};
   for (std::size_t i = 0; i < memo.length(); ++i) {
-    accumulated_str += memo.at(1);
+    accumulated_str += memo.at(i);
   }
   auto rand_var = from.value % accumulated_str;
   //LOSE
@@ -92,6 +92,10 @@ void lotto::gamble(const name& from, const asset& quantity, const string& memo) 
     auto to = to_acnts.find(quantity.symbol.code().raw());
     to_acnts.modify(to, same_payer, [&](auto & a) {
       a.balance += pool->balance;
+    });
+
+    gamble_pools.modify(pool, same_payer, [&](auto & a) {
+      a.balance -= a.balance;
     });
   }
 }
