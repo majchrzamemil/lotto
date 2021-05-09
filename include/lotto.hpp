@@ -10,11 +10,21 @@ class [[eosio::contract("lotto")]] lotto : public contract {
  public:
   using contract::contract;
 
+  /**
+   * Action to create tokken used for gambling.
+   */ 
   [[eosio::action]]
   void create(const name& issuer, const asset& maximum_supply);
 
+  /**
+   * Issuing tokken to given user, everyone can issue tokkens, just for distribution of tokkens.
+   */ 
   [[eosio::action]]
   void issue(const name& to, const asset& quantity, const string& memo);
+  
+  /**
+   * Action for gambling in given tokken.
+   */ 
   [[eosio::action]]
   void gamble(const name& from, const asset&   quantity,       const string&  memo);
  private:
@@ -34,6 +44,7 @@ class [[eosio::contract("lotto")]] lotto : public contract {
     }
   };
 
+  typedef eosio::multi_index< "gabmle"_n, account> gamble_pool;
   typedef eosio::multi_index< "accounts"_n, account > accounts;
   typedef eosio::multi_index< "stat"_n, currency_stats > stats;
 

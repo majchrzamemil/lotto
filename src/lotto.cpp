@@ -16,9 +16,17 @@ void lotto::create(const name& issuer, const asset& maximum_supply) {
     s.max_supply    = maximum_supply;
     s.issuer        = issuer;
   });
+
+  gamble_pool gamble_pools(get_self(), issuer.value);
+  auto to = gamble_pools.find(maximum_supply.symbol.code().raw());
+  if (to == gamble_pools.end()) {
+    gamble_pools.emplace(issuer, [&](auto & a) {
+      a.balance.symbol = maximum_supply.symbol;
+    });
+  }
 }
 
-//TODO:Maybe fuck issue, asset can be removed and made const its only constexpr uint64_t
+//TODO:Maybe fuck memo
 void lotto::issue(const name& to, const asset& quantity, const string& memo) {
   auto sym = quantity.symbol;
   check(sym.is_valid(), "invalid symbol name");
@@ -42,10 +50,9 @@ void lotto::issue(const name& to, const asset& quantity, const string& memo) {
   add_balance(to, quantity, st.issuer);
 }
 
-//TODO:Change to have const quantity
-void lotto::gamble(const name& from, const asset&   quantity, const string&  memo) {
+//TODO:Change to have const quantity, asset can be removed and made const its only constexpr uint64_t
+void lotto::gamble(const name& from, const asset& quantity, const string& memo) {
   require_auth(from);
-  check(is_account(to), "to account does not exist");
   auto sym = quantity.symbol.code();
   stats statstable(get_self(), sym.raw());
   const auto& st = statstable.get(sym.raw());
@@ -53,15 +60,37 @@ void lotto::gamble(const name& from, const asset&   quantity, const string&  mem
   require_recipient(from);
 
   check(quantity.is_valid(), "invalid quantity");
-  check(quantity.amount > 0, "must transfer positive quantity");
+  //Expected ammount for contract
+  uint64_t calculated_value{10lu};
+  for (uint8_t i{0u}; i < quantity.symbol.precision(); ++i) {
+    calculated_value *= 10lu;
+  }
+
+  check(quantity.amount == calculated_value, "In order to gamble send 10 tokkens");
   check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
   check(memo.size() <= 256, "memo has more than 256 bytes");
 
-  //TODO: add some table for gamble, and than gamble with it.
-  //at the end sub and add appropraite balance.
-  //sub_balance(from, quantity);
+  gamble_pool gamble_pools(get_self(), st.issuer.value);
+  auto pool = gamble_pools.find(sym.raw());
+  auto rand_var = 0;
+  //LOSE
+  if (rand_var % 2 == 0) {
+    sub_balance(from, quantity);
 
-  //add_balance(to, quantity, payer );
+    if (pool != gamble_pools.end()) {
+      gamble_pools.modify(pool, same_payer, [&](auto & a) {
+        a.balance += quantity;
+      });
+    }
+  } else {
+    print("dupa");
+    asset value_won;
+    accounts to_acnts(get_self(), from.value);
+    auto to = to_acnts.find(quantity.symbol.code().raw());
+    to_acnts.modify(to, same_payer, [&](auto & a) {
+      a.balance += pool->balance;
+    });
+  }
 }
 
 void lotto::sub_balance(const name& owner, const asset& value) {
