@@ -26,7 +26,6 @@ void lotto::create(const name& issuer, const asset& maximum_supply) {
   }
 }
 
-//TODO:Maybe fuck memo
 void lotto::issue(const name& to, const asset& quantity, const string& memo) {
   auto sym = quantity.symbol;
   check(sym.is_valid(), "invalid symbol name");

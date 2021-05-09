@@ -26,7 +26,7 @@ class [[eosio::contract("lotto")]] lotto : public contract {
    * Action for gambling in given tokken.
    */
   [[eosio::action]]
-  void gamble(const name& from, const asset&   quantity,       const string&  memo);
+  void gamble(const name& from, const asset& quantity, const string&  memo);
  private:
   struct [[eosio::table]] account {
     asset balance;
