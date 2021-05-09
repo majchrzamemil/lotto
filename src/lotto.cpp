@@ -50,7 +50,6 @@ void lotto::issue(const name& to, const asset& quantity, const string& memo) {
   add_balance(to, quantity, st.issuer);
 }
 
-//TODO:Change to have const quantity, asset can be removed and made const its only constexpr uint64_t
 void lotto::gamble(const name& from, const asset& quantity, const string& memo) {
   require_auth(from);
   auto sym = quantity.symbol.code();
@@ -72,9 +71,15 @@ void lotto::gamble(const name& from, const asset& quantity, const string& memo) 
 
   gamble_pool gamble_pools(get_self(), st.issuer.value);
   auto pool = gamble_pools.find(sym.raw());
-  auto rand_var = 0;
+
+  //Silli randoization(not good algorithm) just to introduce some radom
+  uint64_t accumulated_str{};
+  for (std::size_t i = 0; i < memo.length(); ++i) {
+    accumulated_str += memo.at(1);
+  }
+  auto rand_var = from.value % accumulated_str;
   //LOSE
-  if (rand_var % 2 == 0) {
+  if (rand_var % 10 != 0) {
     sub_balance(from, quantity);
 
     if (pool != gamble_pools.end()) {
@@ -83,7 +88,6 @@ void lotto::gamble(const name& from, const asset& quantity, const string& memo) 
       });
     }
   } else {
-    print("dupa");
     asset value_won;
     accounts to_acnts(get_self(), from.value);
     auto to = to_acnts.find(quantity.symbol.code().raw());

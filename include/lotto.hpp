@@ -12,19 +12,19 @@ class [[eosio::contract("lotto")]] lotto : public contract {
 
   /**
    * Action to create tokken used for gambling.
-   */ 
+   */
   [[eosio::action]]
   void create(const name& issuer, const asset& maximum_supply);
 
   /**
    * Issuing tokken to given user, everyone can issue tokkens, just for distribution of tokkens.
-   */ 
+   */
   [[eosio::action]]
   void issue(const name& to, const asset& quantity, const string& memo);
-  
+
   /**
    * Action for gambling in given tokken.
-   */ 
+   */
   [[eosio::action]]
   void gamble(const name& from, const asset&   quantity,       const string&  memo);
  private:
